@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FinFree · Financial Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F1117;
+  --surface: #181B24;
+  --surface2: #1E2130;
+  --surface3: #252A3A;
+  --gold: #F0B429;
+  --gold2: #FFD166;
+  --green: #06D6A0;
+  --red: #EF476F;
+  --blue: #118AB2;
+  --text: #F0EEF6;
+  --muted: #7B82A0;
+  --border: #2A2F45;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body {
+  height:100%; background:#000;
+  font-family:'Nunito', sans-serif;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* Phone Shell */
+.phone {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border-radius: 44px;
+  border: 2px solid #2a2a2a;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status bar */
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px 0;
+  flex-shrink: 0;
+}
+.statusbar .time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.statusbar .icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* Notch */
+.notch {
+  width: 120px;
+  height: 34px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* Screen content */
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.screen::-webkit-scrollbar { display: none; }
+
+/* Pages */
+.page { display: none; min-height: 100%; }
+.page.active { display: block; }
+
+/* ── HOME PAGE ── */
+.home-header {
+  padding: 20px 24px 0;
+  background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+}
+.home-greeting {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.home-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.2;
+}
+.home-title span { color: var(--gold); }
+
+/* Income chip */
+.income-chip {
+  margin: 16px 24px 0;
+  background: linear-gradient(135deg, rgba(240,180,41,0.15), rgba(240,180,41,0.05));
+  border: 1px solid rgba(240,180,41,0.3);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.income-chip .ic-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.income-chip .ic-value { font-size: 22px; font-weight: 900; color: var(--gold); font-family:'JetBrains Mono',monospace; }
+.income-chip .ic-sub { font-size: 11px; color: var(--muted); margin-top:2px; }
+.income-chip .ic-right { text-align: right; }
+.income-chip .ic-free {
+  background: rgba(6,214,160,0.15);
+  border: 1px solid rgba(6,214,160,0.4);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+/* Section header */
+.sec-hdr {
+  padding: 24px 24px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sec-hdr .sh-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.sec-hdr .sh-action {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  cursor: pointer;
+  padding: 4px 12px;
+  background: rgba(240,180,41,0.1);
+  border-radius: 20px;
+}
+
+/* Loan scroll */
+.loan-scroll {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.loan-scroll::-webkit-scrollbar { display: none; }
+
+.loan-pill {
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: 14px;
+  padding: 14px 16px;
+  min-width: 130px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.loan-pill:active { transform: scale(0.97); }
+.loan-pill .lp-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.loan-pill .lp-amount { font-size: 18px; font-weight: 800; color: #ff8a80; font-family:'JetBrains Mono',monospace; }
+
+/* Total debt banner */
+.debt-banner {
+  margin: 0 24px 24px;
+  background: linear-gradient(135deg, rgba(239,71,111,0.15), rgba(239,71,111,0.05));
+  border: 1px solid rgba(239,71,111,0.25);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.debt-banner .db-label { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.debt-banner .db-value { font-size: 24px; font-weight: 900; color: var(--red); font-family:'JetBrains Mono',monospace; }
+.debt-banner .db-months {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+}
+.debt-banner .db-months small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+
+/* Quick stats */
+.qstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 24px 24px;
+}
+.qstat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.qstat-card:active { transform: scale(0.97); background: var(--surface2); }
+.qstat-card .qs-icon { font-size: 22px; margin-bottom: 8px; }
+.qstat-card .qs-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.qstat-card .qs-value { font-size: 17px; font-weight: 800; color: var(--text); font-family:'JetBrains Mono',monospace; }
+.qstat-card .qs-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Goals list */
+.goals-list { padding: 0 24px 100px; }
+.goal-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.goal-item:active { background: var(--surface2); }
+.goal-item .gi-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.goal-item .gi-body { flex: 1; }
+.goal-item .gi-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.goal-item .gi-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.goal-item .gi-arrow { color: var(--muted); font-size: 18px; }
+
+/* Progress bar */
+.mini-prog {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.mini-prog-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+/* ── INPUTS PAGE ── */
+.inputs-page { padding-bottom: 100px; }
+.inp-header {
+  padding: 20px 24px 24px;
+  background: linear-gradient(180deg, var(--surface) 60%, transparent 100%);
+}
+.inp-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.inp-title { font-size: 24px; font-weight: 900; color: var(--text); }
+.inp-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* Form sections */
+.form-section {
+  margin: 0 24px 24px;
+}
+.fs-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fs-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Input field */
+.inp-group { margin-bottom: 14px; }
+.inp-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.inp-wrap {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.inp-wrap:focus-within { border-color: var(--gold); }
+.inp-prefix {
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface2);
+  height: 46px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+}
+.inp-wrap input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 0 14px;
+  height: 46px;
+}
+.inp-wrap input::placeholder { color: var(--muted); font-weight: 400; }
+.inp-wrap select {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  padding: 0 14px;
+  height: 46px;
+  appearance: none;
+  cursor: pointer;
+}
+.inp-wrap select option { background: var(--surface2); }
+
+/* Loan rows */
+.loan-rows {}
+.loan-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.loan-row .lr-num {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(239,71,111,0.15);
+  border: 1px solid rgba(239,71,111,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--red);
+  flex-shrink: 0;
+}
+.loan-row .lr-inp {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.loan-row .lr-inp:focus-within { border-color: var(--red); }
+.loan-row .lr-inp input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ff8a80;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 0 14px;
+  height: 44px;
+}
+.loan-row .lr-inp input::placeholder { color: var(--muted); font-weight: 400; color: #553333; }
+.loan-row .lr-del {
+  width: 36px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: rgba(239,71,111,0.4);
+  font-size: 18px;
+  transition: color 0.2s;
+}
+.loan-row .lr-del:active { color: var(--red); }
+
+.add-loan-btn {
+  width: 100%;
+  height: 44px;
+  background: rgba(239,71,111,0.08);
+  border: 1.5px dashed rgba(239,71,111,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.add-loan-btn:active { background: rgba(239,71,111,0.15); }
+
+/* Calculate button */
+.calc-btn {
+  margin: 8px 24px 0;
+  width: calc(100% - 48px);
+  height: 56px;
+  background: linear-gradient(135deg, var(--gold), #e6a020);
+  border: none;
+  border-radius: var(--radius);
+  color: #0F0F0F;
+  font-size: 16px;
+  font-weight: 900;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 8px 24px rgba(240,180,41,0.3);
+}
+.calc-btn:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(240,180,41,0.2); }
+
+/* ── RESULTS PAGE ── */
+.results-page { padding-bottom: 100px; }
+.res-header {
+  padding: 20px 24px 20px;
+  background: linear-gradient(180deg, var(--surface) 60%, transparent);
+}
+.res-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(6,214,160,0.15);
+  border: 1px solid rgba(6,214,160,0.3);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.res-title { font-size: 22px; font-weight: 900; color: var(--text); line-height: 1.3; }
+.res-title span { color: var(--gold); }
+
+/* Big metric */
+.big-metric {
+  margin: 0 24px 16px;
+  background: linear-gradient(135deg, var(--surface2), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+.bm-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.bm-value { font-size: 42px; font-weight: 900; color: var(--green); font-family: 'JetBrains Mono', monospace; line-height: 1; }
+.bm-sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* Results grid */
+.res-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 24px 16px;
+}
+.rg-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.rg-card .rg-icon { font-size: 20px; margin-bottom: 8px; }
+.rg-card .rg-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.rg-card .rg-value { font-size: 16px; font-weight: 800; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+.rg-card .rg-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Monthly breakdown */
+.month-breakdown {
+  margin: 0 24px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.mb-header {
+  padding: 14px 18px;
+  background: var(--surface2);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.mb-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.mb-row:last-child { border-bottom: none; }
+.mb-row .mbr-left { font-size: 13px; color: var(--text); font-weight: 600; }
+.mb-row .mbr-right { font-size: 13px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.mb-row .mbr-pct { font-size: 10px; color: var(--muted); margin-top: 1px; text-align: right; }
+
+/* Schedule table */
+.schedule-wrap {
+  margin: 0 24px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.sch-header {
+  padding: 14px 18px;
+  background: var(--surface2);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.sch-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr 80px;
+  gap: 0;
+  padding: 10px 18px;
+  border-bottom: 1px solid #1a1e2e;
+  align-items: center;
+  transition: background 0.15s;
+}
+.sch-row:last-child { border-bottom: none; }
+.sch-row:active { background: var(--surface2); }
+.sch-row.done { background: rgba(6,214,160,0.05); }
+.sch-row .sr-month { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.sch-row .sr-paid { font-size: 12px; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+.sch-row .sr-rem { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.sch-row .sr-status { font-size: 11px; text-align: right; }
+
+/* Goals timeline */
+.goals-timeline {
+  margin: 0 24px 16px;
+}
+.gt-item {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.gt-item::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: -16px;
+  width: 2px;
+  background: var(--border);
+}
+.gt-item:last-child::before { display: none; }
+.gt-dot {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border: 2px solid var(--border);
+}
+.gt-body { flex: 1; }
+.gt-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.gt-detail { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+.gt-when {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: rgba(15,17,23,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px 16px;
+  z-index: 50;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 70px;
+}
+.nav-item:active { background: var(--surface); }
+.nav-item .ni-icon { font-size: 22px; }
+.nav-item .ni-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; }
+.nav-item.active .ni-label { color: var(--gold); }
+.nav-item.active .ni-icon { filter: drop-shadow(0 0 6px var(--gold)); }
+
+/* Animations */
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.anim { animation: slideUp 0.4s ease forwards; }
+.anim-d1 { animation-delay: 0.05s; opacity:0; }
+.anim-d2 { animation-delay: 0.1s; opacity:0; }
+.anim-d3 { animation-delay: 0.15s; opacity:0; }
+.anim-d4 { animation-delay: 0.2s; opacity:0; }
+
+/* Toast */
+.toast {
+  position: absolute;
+  bottom: 100px;
+  left: 24px; right: 24px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  z-index: 200;
+  display: none;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.show { display: flex; align-items: center; gap: 10px; }
+
+/* Scrollbar none everywhere */
+* { scrollbar-width: none; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <!-- Status bar -->
+  <div class="statusbar">
+    <span class="time" id="clock">9:41</span>
+    <div class="icons">
+      <span>▲▲▲</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Screen -->
+  <div class="screen" id="screen">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="home-header anim">
+        <div class="home-greeting">🇲🇿 Mozambique Plan</div>
+        <div class="home-title">Your <span>Financial</span><br>Freedom Map</div>
+      </div>
+
+      <div class="income-chip anim anim-d1" id="income-chip">
+        <div>
+          <div class="ic-label">Monthly Salary</div>
+          <div class="ic-value" id="display-income">₹57,000</div>
+          <div class="ic-sub" id="display-rate">$600 @ ₹94.91</div>
+        </div>
+        <div class="ic-right">
+          <div class="ic-free">FREE STAY</div>
+          <div class="ic-sub" style="margin-top:8px; font-size:10px;">Food + Room + Visa ✓</div>
+        </div>
+      </div>
+
+      <div class="sec-hdr anim anim-d2">
+        <div class="sh-title">Your Loans</div>
+        <div class="sh-action" onclick="goTo('inputs')">Edit ✏️</div>
+      </div>
+      <div class="loan-scroll anim anim-d2" id="loan-chips">
+        <!-- dynamic -->
+      </div>
+
+      <div class="debt-banner anim anim-d2" id="debt-banner">
+        <div>
+          <div class="db-label">Total Debt</div>
+          <div class="db-value" id="display-total-debt">₹3,64,856</div>
+        </div>
+        <div class="db-months">
+          <span id="display-months">~10 months</span>
+          <small>to be debt-free</small>
+        </div>
+      </div>
+
+      <div class="qstats anim anim-d3">
+        <div class="qstat-card" onclick="goTo('results')">
+          <div class="qs-icon">💸</div>
+          <div class="qs-label">Monthly EMI</div>
+          <div class="qs-value" id="display-emi">₹40,000</div>
+          <div class="qs-sub">to clear debt</div>
+        </div>
+        <div class="qstat-card" onclick="goTo('results')">
+          <div class="qs-icon">📈</div>
+          <div class="qs-label">FD Maturity</div>
+          <div class="qs-value" id="display-fd">₹1.58L</div>
+          <div class="qs-sub">after 12 months</div>
+        </div>
+        <div class="qstat-card" onclick="goTo('results')">
+          <div class="qs-icon">🪙</div>
+          <div class="qs-label">Gold Budget</div>
+          <div class="qs-value" id="display-gold">₹1.0L</div>
+          <div class="qs-sub">for family</div>
+        </div>
+        <div class="qstat-card" onclick="goTo('results')">
+          <div class="qs-icon">🚗</div>
+          <div class="qs-label">Car Fund</div>
+          <div class="qs-value" id="display-car">Year 2</div>
+          <div class="qs-sub">down payment ready</div>
+        </div>
+      </div>
+
+      <div class="sec-hdr anim anim-d4">
+        <div class="sh-title">Goals</div>
+        <div class="sh-action" onclick="goTo('results')">View Plan →</div>
+      </div>
+      <div class="goals-list anim anim-d4">
+        <div class="goal-item" onclick="goTo('results')">
+          <div class="gi-icon" style="background:rgba(239,71,111,0.15);">💳</div>
+          <div class="gi-body">
+            <div class="gi-title">Clear All Loans</div>
+            <div class="gi-sub">Priority #1 · Debt-free by Month 10</div>
+            <div class="mini-prog"><div class="mini-prog-fill" style="background:var(--red); width:0%" id="prog1"></div></div>
+          </div>
+          <div class="gi-arrow">›</div>
+        </div>
+        <div class="goal-item" onclick="goTo('results')">
+          <div class="gi-icon" style="background:rgba(240,180,41,0.15);">🪙</div>
+          <div class="gi-body">
+            <div class="gi-title">Gold for Family</div>
+            <div class="gi-sub">Father · Mother · Sister · Brother</div>
+            <div class="mini-prog"><div class="mini-prog-fill" style="background:var(--gold); width:0%" id="prog2"></div></div>
+          </div>
+          <div class="gi-arrow">›</div>
+        </div>
+        <div class="goal-item" onclick="goTo('results')">
+          <div class="gi-icon" style="background:rgba(17,138,178,0.15);">🚗</div>
+          <div class="gi-body">
+            <div class="gi-title">Buy a Car</div>
+            <div class="gi-sub">₹12–13 Lakhs · Year 2</div>
+            <div class="mini-prog"><div class="mini-prog-fill" style="background:var(--blue); width:0%" id="prog3"></div></div>
+          </div>
+          <div class="gi-arrow">›</div>
+        </div>
+        <div class="goal-item" onclick="goTo('results')">
+          <div class="gi-icon" style="background:rgba(6,214,160,0.15);">🏠</div>
+          <div class="gi-body">
+            <div class="gi-title">Build a House</div>
+            <div class="gi-sub">Long-term · Year 3+</div>
+            <div class="mini-prog"><div class="mini-prog-fill" style="background:var(--green); width:0%" id="prog4"></div></div>
+          </div>
+          <div class="gi-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUTS PAGE -->
+    <div class="page" id="page-inputs">
+      <div class="inputs-page">
+        <div class="inp-header">
+          <div class="inp-back" onclick="goTo('home')">‹ Back</div>
+          <div class="inp-title">Edit Your Plan</div>
+          <div class="inp-sub">Adjust inputs to recalculate everything</div>
+        </div>
+
+        <!-- Income section -->
+        <div class="form-section">
+          <div class="fs-label">💰 Income</div>
+          <div class="inp-group">
+            <div class="inp-label">Monthly Salary (USD)</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">$</div>
+              <input type="number" id="inp-salary" value="600" placeholder="600" inputmode="numeric">
+            </div>
+          </div>
+          <div class="inp-group">
+            <div class="inp-label">USD → INR Exchange Rate</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">₹/$</div>
+              <input type="number" id="inp-rate" value="94.91" step="0.01" placeholder="94.91" inputmode="decimal">
+            </div>
+          </div>
+          <div class="inp-group">
+            <div class="inp-label">Monthly Allocation to Loans (₹)</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">₹</div>
+              <input type="number" id="inp-emi" value="40000" placeholder="40000" inputmode="numeric">
+            </div>
+          </div>
+          <div class="inp-group">
+            <div class="inp-label">Monthly FD Contribution (₹)</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">₹</div>
+              <input type="number" id="inp-fd" value="12000" placeholder="12000" inputmode="numeric">
+            </div>
+          </div>
+          <div class="inp-group">
+            <div class="inp-label">FD Interest Rate (% per year)</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">%</div>
+              <input type="number" id="inp-fdrate" value="10" step="0.1" placeholder="10" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+
+        <!-- Loans section -->
+        <div class="form-section">
+          <div class="fs-label">💳 Loans</div>
+          <div id="loan-rows">
+            <!-- dynamic -->
+          </div>
+          <button class="add-loan-btn" onclick="addLoanRow()">＋ Add Another Loan</button>
+        </div>
+
+        <!-- Goals -->
+        <div class="form-section">
+          <div class="fs-label">🎯 Goals</div>
+          <div class="inp-group">
+            <div class="inp-label">Car Budget (₹)</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">₹</div>
+              <input type="number" id="inp-car" value="1250000" placeholder="1250000" inputmode="numeric">
+            </div>
+          </div>
+          <div class="inp-group">
+            <div class="inp-label">Gold Budget per Family Member (₹)</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">₹</div>
+              <input type="number" id="inp-gold" value="35000" placeholder="35000" inputmode="numeric">
+            </div>
+          </div>
+          <div class="inp-group">
+            <div class="inp-label">Number of Family Members for Gold</div>
+            <div class="inp-wrap">
+              <div class="inp-prefix">#</div>
+              <input type="number" id="inp-goldmem" value="4" min="1" max="20" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">
+          <span>⚡</span> Calculate My Plan
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULTS PAGE -->
+    <div class="page" id="page-results">
+      <div class="results-page">
+        <div class="res-header">
+          <div class="inp-back" onclick="goTo('home')">‹ Home</div>
+          <div class="res-badge">✦ Plan Generated</div>
+          <div class="res-title">Your Path to<br><span>Financial Freedom</span></div>
+        </div>
+
+        <div class="big-metric anim">
+          <div class="bm-label">Debt-Free In</div>
+          <div class="bm-value" id="res-months">10</div>
+          <div class="bm-sub" id="res-months-label">months · All ₹3,64,856 cleared</div>
+        </div>
+
+        <div class="res-grid anim anim-d1">
+          <div class="rg-card">
+            <div class="rg-icon">💵</div>
+            <div class="rg-label">Monthly Income</div>
+            <div class="rg-value" id="res-income">₹57K</div>
+            <div class="rg-sub" id="res-income-sub">$600 converted</div>
+          </div>
+          <div class="rg-card">
+            <div class="rg-icon">📈</div>
+            <div class="rg-label">FD at 12 Mo</div>
+            <div class="rg-value" id="res-fd12">₹1.58L</div>
+            <div class="rg-sub" id="res-fdrate-sub">@ 10% p.a.</div>
+          </div>
+          <div class="rg-card">
+            <div class="rg-icon">🪙</div>
+            <div class="rg-label">Total Gold</div>
+            <div class="rg-value" id="res-gold">₹1.40L</div>
+            <div class="rg-sub" id="res-gold-sub">4 members</div>
+          </div>
+          <div class="rg-card">
+            <div class="rg-icon">🏦</div>
+            <div class="rg-label">Monthly Savings</div>
+            <div class="rg-value" id="res-savings">₹17K</div>
+            <div class="rg-sub">after EMI + FD</div>
+          </div>
+        </div>
+
+        <div class="month-breakdown anim anim-d2">
+          <div class="mb-header">📊 Monthly Breakdown</div>
+          <div class="mb-row">
+            <div class="mbr-left">Loan Repayment</div>
+            <div>
+              <div class="mbr-right" id="mb-emi" style="color:var(--red);">₹40,000</div>
+              <div class="mbr-pct" id="mb-emi-pct">70.2%</div>
+            </div>
+          </div>
+          <div class="mb-row">
+            <div class="mbr-left">FD Investment</div>
+            <div>
+              <div class="mbr-right" id="mb-fd" style="color:var(--gold);">₹12,000</div>
+              <div class="mbr-pct" id="mb-fd-pct">21.1%</div>
+            </div>
+          </div>
+          <div class="mb-row">
+            <div class="mbr-left">Personal/Misc</div>
+            <div>
+              <div class="mbr-right" id="mb-misc" style="color:var(--blue);">₹5,000</div>
+              <div class="mbr-pct" id="mb-misc-pct">8.7%</div>
+            </div>
+          </div>
+          <div class="mb-row" style="background:rgba(6,214,160,0.05);">
+            <div class="mbr-left" style="font-weight:800; color:var(--text);">Total</div>
+            <div>
+              <div class="mbr-right" id="mb-total" style="color:var(--green);">₹57,000</div>
+              <div class="mbr-pct">100%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="schedule-wrap anim anim-d3">
+          <div class="sch-header">📅 Repayment Schedule</div>
+          <div id="sch-rows"><!-- dynamic --></div>
+        </div>
+
+        <!-- Goals Timeline -->
+        <div class="sec-hdr" style="padding:20px 24px 12px;">
+          <div class="sh-title">Goals Timeline</div>
+        </div>
+        <div class="goals-timeline anim anim-d4" id="goals-timeline">
+          <!-- dynamic -->
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /screen -->
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="goTo('home')">
+      <div class="ni-icon">🏠</div>
+      <div class="ni-label">Home</div>
+    </div>
+    <div class="nav-item" id="nav-inputs" onclick="goTo('inputs')">
+      <div class="ni-icon">✏️</div>
+      <div class="ni-label">Inputs</div>
+    </div>
+    <div class="nav-item" id="nav-results" onclick="goTo('results')">
+      <div class="ni-icon">📊</div>
+      <div class="ni-label">Results</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span id="toast-icon">✅</span>
+    <span id="toast-msg">Plan recalculated!</span>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+// State
+let state = {
+  salary: 600,
+  rate: 94.91,
+  emi: 40000,
+  fd: 12000,
+  fdRate: 10,
+  loans: [100000, 106354, 24898, 87604, 46000],
+  carBudget: 1250000,
+  goldPerMember: 35000,
+  goldMembers: 4
+};
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2,'0');
+  const m = now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('clock').textContent = h+':'+m;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Format numbers
+function fmt(n) {
+  if (n >= 10000000) return '₹' + (n/10000000).toFixed(1) + 'Cr';
+  if (n >= 100000) return '₹' + (n/100000).toFixed(1) + 'L';
+  if (n >= 1000) return '₹' + Math.round(n/1000) + 'K';
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+function fmtFull(n) {
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+// Navigation
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('nav-'+page).classList.add('active');
+  document.getElementById('screen').scrollTop = 0;
+  if (page === 'results') renderResults();
+  if (page === 'home') updateHome();
+}
+
+// Build loan rows
+function buildLoanRows() {
+  const container = document.getElementById('loan-rows');
+  container.innerHTML = '';
+  state.loans.forEach((loan, i) => {
+    const row = document.createElement('div');
+    row.className = 'loan-row';
+    row.innerHTML = `
+      <div class="lr-num">${i+1}</div>
+      <div class="lr-inp">
+        <input type="number" inputmode="numeric" value="${loan}" placeholder="Enter amount" onchange="updateLoan(${i}, this.value)">
+      </div>
+      <div class="lr-del" onclick="removeLoan(${i})">✕</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function addLoanRow() {
+  state.loans.push(0);
+  buildLoanRows();
+  showToast('➕', 'Loan row added');
+}
+
+function removeLoan(i) {
+  if (state.loans.length <= 1) { showToast('⚠️', 'Need at least 1 loan'); return; }
+  state.loans.splice(i, 1);
+  buildLoanRows();
+}
+
+function updateLoan(i, val) {
+  state.loans[i] = parseFloat(val) || 0;
+}
+
+// Sync inputs → state
+function syncInputs() {
+  state.salary = parseFloat(document.getElementById('inp-salary').value) || 600;
+  state.rate = parseFloat(document.getElementById('inp-rate').value) || 94.91;
+  state.emi = parseFloat(document.getElementById('inp-emi').value) || 40000;
+  state.fd = parseFloat(document.getElementById('inp-fd').value) || 12000;
+  state.fdRate = parseFloat(document.getElementById('inp-fdrate').value) || 10;
+  state.carBudget = parseFloat(document.getElementById('inp-car').value) || 1250000;
+  state.goldPerMember = parseFloat(document.getElementById('inp-gold').value) || 35000;
+  state.goldMembers = parseInt(document.getElementById('inp-goldmem').value) || 4;
+  // sync loan rows
+  document.querySelectorAll('#loan-rows input').forEach((inp, i) => {
+    state.loans[i] = parseFloat(inp.value) || 0;
+  });
+}
+
+function calculate() {
+  syncInputs();
+  updateHome();
+  renderResults();
+  showToast('⚡', 'Plan recalculated!');
+  goTo('results');
+}
+
+// Calculate logic
+function calcPlan() {
+  const monthlyIncome = state.salary * state.rate;
+  const totalDebt = state.loans.reduce((a,b) => a+b, 0);
+  const monthsToFree = Math.ceil(totalDebt / state.emi);
+  
+  // FD after 12 months (monthly compound approx)
+  let fdTotal = 0;
+  const monthlyFdRate = state.fdRate / 100 / 12;
+  for (let m = 1; m <= 12; m++) {
+    fdTotal += state.fd * Math.pow(1 + monthlyFdRate, 12 - m + 1);
+  }
+  
+  const totalGold = state.goldPerMember * state.goldMembers;
+  const misc = monthlyIncome - state.emi - state.fd;
+  
+  return { monthlyIncome, totalDebt, monthsToFree, fdTotal, totalGold, misc };
+}
+
+function updateHome() {
+  const p = calcPlan();
+  document.getElementById('display-income').textContent = fmtFull(Math.round(p.monthlyIncome));
+  document.getElementById('display-rate').textContent = `$${state.salary} @ ₹${state.rate}`;
+  document.getElementById('display-total-debt').textContent = fmtFull(p.totalDebt);
+  document.getElementById('display-months').textContent = `~${p.monthsToFree} months`;
+  document.getElementById('display-emi').textContent = fmtFull(state.emi);
+  document.getElementById('display-fd').textContent = fmt(p.fdTotal);
+  document.getElementById('display-gold').textContent = fmt(p.totalGold);
+
+  // Loan chips
+  const chips = document.getElementById('loan-chips');
+  chips.innerHTML = '';
+  state.loans.forEach((l, i) => {
+    chips.innerHTML += `<div class="loan-pill"><div class="lp-label">Loan ${String(i+1).padStart(2,'0')}</div><div class="lp-amount">${fmtFull(l)}</div></div>`;
+  });
+
+  // Progress bars (mock)
+  setTimeout(() => {
+    document.getElementById('prog1').style.width = '0%';
+    document.getElementById('prog2').style.width = '0%';
+    document.getElementById('prog3').style.width = '0%';
+    document.getElementById('prog4').style.width = '0%';
+  }, 10);
+}
+
+function renderResults() {
+  const p = calcPlan();
+  
+  document.getElementById('res-months').textContent = p.monthsToFree;
+  document.getElementById('res-months-label').textContent = `months · All ${fmtFull(p.totalDebt)} cleared`;
+  document.getElementById('res-income').textContent = fmt(p.monthlyIncome);
+  document.getElementById('res-income-sub').textContent = `$${state.salary} converted`;
+  document.getElementById('res-fd12').textContent = fmt(p.fdTotal);
+  document.getElementById('res-fdrate-sub').textContent = `@ ${state.fdRate}% p.a.`;
+  document.getElementById('res-gold').textContent = fmt(p.totalGold);
+  document.getElementById('res-gold-sub').textContent = `${state.goldMembers} members`;
+  document.getElementById('res-savings').textContent = fmt(Math.max(0, p.misc));
+
+  // Monthly breakdown
+  const inc = p.monthlyIncome;
+  document.getElementById('mb-emi').textContent = fmtFull(state.emi);
+  document.getElementById('mb-emi-pct').textContent = (state.emi/inc*100).toFixed(1)+'%';
+  document.getElementById('mb-fd').textContent = fmtFull(state.fd);
+  document.getElementById('mb-fd-pct').textContent = (state.fd/inc*100).toFixed(1)+'%';
+  const misc = Math.max(0, inc - state.emi - state.fd);
+  document.getElementById('mb-misc').textContent = fmtFull(misc);
+  document.getElementById('mb-misc-pct').textContent = (misc/inc*100).toFixed(1)+'%';
+  document.getElementById('mb-total').textContent = fmtFull(inc);
+
+  // Repayment schedule
+  const schRows = document.getElementById('sch-rows');
+  schRows.innerHTML = '';
+  let remaining = p.totalDebt;
+  for (let m = 1; m <= p.monthsToFree; m++) {
+    const paid = Math.min(state.emi, remaining);
+    remaining = Math.max(0, remaining - paid);
+    const done = remaining === 0;
+    schRows.innerHTML += `
+      <div class="sch-row ${done?'done':''}">
+        <span class="sr-month">M${m}</span>
+        <span class="sr-paid">${fmt(state.emi * m)}</span>
+        <span class="sr-rem">${fmtFull(remaining)}</span>
+        <span class="sr-status">${done ? '✅ Done!' : remaining < state.emi*2 ? '🟢' : remaining < p.totalDebt/2 ? '🟡' : '🔴'}</span>
+      </div>`;
+    if (remaining === 0) break;
+  }
+
+  // Goals timeline
+  const debtFreeMonth = p.monthsToFree;
+  const goldMonths = Math.ceil(p.totalGold / (p.monthlyIncome * 0.5));
+  const gt = document.getElementById('goals-timeline');
+  gt.innerHTML = `
+    <div class="gt-item">
+      <div class="gt-dot" style="background:rgba(239,71,111,0.15); border-color:rgba(239,71,111,0.3);">💳</div>
+      <div class="gt-body">
+        <div class="gt-title">Clear All Loans</div>
+        <div class="gt-detail">${fmtFull(p.totalDebt)} across ${state.loans.length} loan${state.loans.length>1?'s':''}.<br>₹${state.emi.toLocaleString('en-IN')}/month repayment.</div>
+        <span class="gt-when" style="background:rgba(239,71,111,0.15); color:var(--red);">Month ${debtFreeMonth} ✅</span>
+      </div>
+    </div>
+    <div class="gt-item">
+      <div class="gt-dot" style="background:rgba(240,180,41,0.15); border-color:rgba(240,180,41,0.3);">🪙</div>
+      <div class="gt-body">
+        <div class="gt-title">Gold for Family</div>
+        <div class="gt-detail">${state.goldMembers} members · ${fmtFull(state.goldPerMember)} each<br>Total: ${fmtFull(p.totalGold)}</div>
+        <span class="gt-when" style="background:rgba(240,180,41,0.15); color:var(--gold);">Month ${debtFreeMonth+1}–${debtFreeMonth+3} 🪙</span>
+      </div>
+    </div>
+    <div class="gt-item">
+      <div class="gt-dot" style="background:rgba(17,138,178,0.15); border-color:rgba(17,138,178,0.3);">🚗</div>
+      <div class="gt-body">
+        <div class="gt-title">Buy a Car</div>
+        <div class="gt-detail">Budget: ${fmtFull(state.carBudget)}<br>30–40% down + low-interest loan</div>
+        <span class="gt-when" style="background:rgba(17,138,178,0.15); color:var(--blue);">Year 2 🚗</span>
+      </div>
+    </div>
+    <div class="gt-item">
+      <div class="gt-dot" style="background:rgba(6,214,160,0.15); border-color:rgba(6,214,160,0.3);">🏠</div>
+      <div class="gt-body">
+        <div class="gt-title">Build a House</div>
+        <div class="gt-detail">Start dedicated RD/FD from Year 2.<br>Home loan gives 80C + 24(b) tax benefits.</div>
+        <span class="gt-when" style="background:rgba(6,214,160,0.15); color:var(--green);">Year 3+ 🏠</span>
+      </div>
+    </div>
+  `;
+}
+
+function showToast(icon, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Init
+buildLoanRows();
+updateHome();
+renderResults();
+</script>
+</body>
+</html>
